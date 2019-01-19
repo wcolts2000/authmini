@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 
-const db = require('./database/dbConfig.js');
+const db = require('./database/dbHelpers.js');
 
 const server = express();
 
@@ -16,14 +16,14 @@ server.get('/', (req, res) => {
 server.post('/api/register', (req, res) =>{
   const user = req.body;
   user.password = bcrypt.hashSync(user.password, 15);
-  db('users').insert(user)
+  db.insert(user)
   .then(ids => res.status(201).json({ id: ids[0]}))
   .catch(err => res.status(500).send(err))
 })
 
 server.post('/api/login', (req, res) => {
   const user = req.body;
-  db('users').where('username', user.username)
+  db.findByUsername(user.username)
   .then(users => {
     if( users.length && bcrypt.compareSync(user.password, users[0].password)) {
       res.status(200).json({ info: "correct"})
